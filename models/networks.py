@@ -557,20 +557,20 @@ class PatchSampleF(nn.Module):
             self.create_mlp(feats)
         for feat_id, feat in enumerate(feats):
             B, H, W = feat.shape[0], feat.shape[2], feat.shape[3]
-            feat_reshape = feat.permute(0, 2, 3, 1).flatten(1, 2)
+            feat_reshape = feat.permute(0, 2, 3, 1).flatten(1, 2)  # 1x68644x3
             if num_patches > 0:
                 if patch_ids is not None:
                     patch_id = patch_ids[feat_id]
                 else:
-                    patch_id = torch.randperm(feat_reshape.shape[1], device=feats[0].device)
-                    patch_id = patch_id[:int(min(num_patches, patch_id.shape[0]))]  # .to(patch_ids.device)
-                x_sample = feat_reshape[:, patch_id, :].flatten(0, 1)  # reshape(-1, x.shape[1])
+                    patch_id = torch.randperm(feat_reshape.shape[1], device=feats[0].device)  # 68644
+                    patch_id = patch_id[:int(min(num_patches, patch_id.shape[0]))]  # .to(patch_ids.device) 256
+                x_sample = feat_reshape[:, patch_id, :].flatten(0, 1)  # reshape(-1, x.shape[1]) # 256x3
             else:
                 x_sample = feat_reshape
                 patch_id = []
             if self.use_mlp:
                 mlp = getattr(self, 'mlp_%d' % feat_id)
-                x_sample = mlp(x_sample)
+                x_sample = mlp(x_sample)  # 256x256
             return_ids.append(patch_id)
             x_sample = self.l2norm(x_sample)
 

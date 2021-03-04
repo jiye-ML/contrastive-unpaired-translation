@@ -201,10 +201,10 @@ class CUTModel(BaseModel):
 
         if self.opt.flip_equivariance and self.flipped_for_equivariance:
             feat_q = [torch.flip(fq, [3]) for fq in feat_q]
-
+        # feat_k_pool 和 feat_q_pool取相同的patch
         feat_k = self.netG(src, self.nce_layers, encode_only=True)
-        feat_k_pool, sample_ids = self.netF(feat_k, self.opt.num_patches, None)
-        feat_q_pool, _ = self.netF(feat_q, self.opt.num_patches, sample_ids)
+        feat_k_pool, sample_ids = self.netF(feat_k, self.opt.num_patches, None)  # 每个点所在的所有通道为一个patch
+        feat_q_pool, _ = self.netF(feat_q, self.opt.num_patches, sample_ids)  # 5x256x256
 
         total_nce_loss = 0.0
         for f_q, f_k, crit, nce_layer in zip(feat_q_pool, feat_k_pool, self.criterionNCE, self.nce_layers):
